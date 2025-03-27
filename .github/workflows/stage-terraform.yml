@@ -4,12 +4,12 @@ name: 'Terraform'
 on:
   push:
     branches:
-      - 'stage'
+      - 'main'
   pull_request:
     branches:
       - 'main'
     paths-ignore:
-      - '**/stage-terraform.yml'
+      - '**/main-terraform.yml'
   workflow_dispatch:
     inputs:
       confirm_destroy:
@@ -24,7 +24,7 @@ jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
-    environment: stage
+    environment: main
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
@@ -33,13 +33,13 @@ jobs:
 
     steps:
     # - name: Check base ref
-    #   if: github.ref == 'refs/heads/stage'
+    #   if: github.ref == 'refs/heads/main'
     #   run: |
-    #     echo "Merging to stage from develop is not allowed."
+    #     echo "Merging to main from develop is not allowed."
     #     exit 1
 
     # - name: Continue with normal operations
-    #   if: github.ref != 'refs/heads/stage'
+    #   if: github.ref != 'refs/heads/main'
     #   run: |
     #     echo "This is a valid push or pull request on develop."
 
@@ -121,12 +121,12 @@ jobs:
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
-      run: cd terraform_stage; terraform init ; terraform plan -input=false
+      run: cd terraform_main; terraform init ; terraform plan -input=false
 
       # On push to "main", build or change infrastructure according to Terraform configuration files
       # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
     - name: Terraform Apply
-      run: cd terraform_stage; terraform apply -auto-approve -input=false
+      run: cd terraform_main; terraform apply -auto-approve -input=false
 
   backend_setup:
     runs-on: ubuntu-latest
@@ -145,10 +145,10 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.TF_ASW_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.ASW_AWS_SECRET_ACCESS_KEY }}
         run: |
-          cd terraform_stage; terraform init \
+          cd terraform_main; terraform init \
             -backend-config="region=ap-northeast-2" \
             -backend-config="bucket=asw-terraformstate" \
-            -backend-config="key=stage/terraform/terraform.tfstate"
+            -backend-config="key=main/terraform/terraform.tfstate"
 
 
 
@@ -176,10 +176,10 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.TF_ASW_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.ASW_AWS_SECRET_ACCESS_KEY }}
         run: |
-          cd terraform_stage; terraform init \
+          cd terraform_main; terraform init \
             -backend-config="region=ap-northeast-2" \
             -backend-config="bucket=asw-terraformstate" \
-            -backend-config="key=stage/terraform/terraform.tfstate"
+            -backend-config="key=main/terraform/terraform.tfstate"
 
       - name: Terraform Destroy
         if: ${{ github.event.inputs.confirm_destroy == 'DESTROY' }}
@@ -187,7 +187,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.TF_ASW_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.ASW_AWS_SECRET_ACCESS_KEY }}
         run: |
-          cd terraform_stage; terraform destroy -auto-approve
+          cd terraform_main; terraform destroy -auto-approve
 # test
 # test
 # test
